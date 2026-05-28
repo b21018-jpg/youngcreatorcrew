@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>너 공부법 지금 RED RED 넘어가 한계점 GREEN GREEN</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;900&family=Noto+Sans+KR:wght@300;700&display=swap');
+
+        :root {
+            --neon-red: #ff003c;
+            --neon-green: #39ff14;
+            --dark-bg: #0d0d0d;
+            --glitch-grey: #1a1a1a;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle, #222 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* 힙한 노이즈 애니메이션 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* 메인 타이틀 디자인 */
+        h1 {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 3rem;
+            line-height: 1.1;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            word-break: keep-all;
+        }
+
+        .red-text { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); }
+        .green-text { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #333;
+            padding: 30px;
+            border-radius: 0px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .card::after {
+            content: "SYSTEM ERROR 404";
+            position: absolute;
+            top: -10px; right: 10px;
+            background: var(--neon-red);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; padding: 2px 5px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--neon-green);
+            color: black;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+
+        .question-box { display: none; }
+        .active { display: block; }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: #ccc;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .option-btn:hover { border-color: var(--neon-green); color: white; }
+
+        .progress-bar {
+            height: 5px; background: #222; margin-bottom: 30px;
+        }
+        .progress-inner {
+            height: 100%; background: var(--neon-red); width: 0%; transition: 0.3s;
+        }
+
+        #result-area {
+            text-align: left;
+            border: 3px double var(--neon-green);
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="start-page" class="active">
+        <h1 id="main-title">
+            너 공부법 지금 <br><span class="red-text">RED RED</span> <br>
+            넘어가 한계점 <br><span class="green-text">GREEN GREEN</span>
+        </h1>
+        <p style="letter-spacing: 2px; color: #888;">[ MBTI X STUDY HABIT ANALYZER ]</p>
+        <div class="card">
+            중고등학생을 위한 힙한 공부법 교정 프로젝트.<br>
+            내 성격과 내 습관이 따로 놀고 있지는 않나?
+        </div>
+        <button class="btn" onclick="startTest()">START_ANALYSIS</button>
+    </div>
+
+    <div id="test-page" class="question-box">
+        <div class="progress-bar"><div id="progress" class="progress-inner"></div></div>
+        <h2 id="step-title" style="font-family: 'Orbitron'; font-size: 0.8rem; color: var(--neon-green);">STEP 01. MBTI_CHECK</h2>
+        <div class="card">
+            <p id="question-text" style="font-size: 1.2rem; font-weight: bold;"></p>
+        </div>
+        <div id="options">
+            <button class="option-btn" onclick="nextQuestion(1)">매우 그렇다</button>
+            <button class="option-btn" onclick="nextQuestion(0.5)">어느 정도 그렇다</button>
+            <button class="option-btn" onclick="nextQuestion(-0.5)">어느 정도 아니다</button>
+            <button class="option-btn" onclick="nextQuestion(-1)">전혀 아니다</button>
+        </div>
+    </div>
+
+    <div id="result-page" class="question-box">
+        <h1 class="green-text">ANALYSIS_COMPLETE</h1>
+        <div id="result-area" class="card">
+            </div>
+        <button class="btn" onclick="location.reload()">RETAKE_TEST</button>
+    </div>
+</div>
+
+<script>
+    // MBTI 질문 (4문항) + 습관 질문 (8문항)
+    const questions = [
+        { q: "쉬는 시간에 복도에서 친구들과 떠드는 것이 혼자 쉬는 것보다 즐겁다.", type: "E" },
+        { q: "'좀비 사태가 일어나면 어떨까?' 같이 만약의 상황에 대해서 상상하는 것을 즐긴다.", type: "N" },
+        { q: "친구가 고민을 털어놓으면, 해결책을 제시하기보다 제일 먼저 감정적으로 공감해준다.", type: "F" },
+        { q: "과제를 할 때 흐름에 따라 자유롭게 하는 것보다 계획을 세워서 한 단계씩 해결해나가는 것을 좋아한다.", type: "J" },
+        // 습관 질문
+        { q: "[습관] 모르는 게 생기면 바로 질문하며 해결하는 편이다.", type: "hE" },
+        { q: "[습관] 나만의 독립된 공간에서 공부하는 것이 가장 집중이 잘 된다.", type: "hI" },
+        { q: "[습관] 구체적인 기출 문제 풀이와 암기 위주로 공부한다.", type: "hS" },
+        { q: "[습관] 전체적인 개념의 흐름과 원리를 이해하는 공부를 한다.", type: "hN" },
+        { q: "[습관] 공부 성과를 점수나 등수처럼 수치로 확인하며 분석한다.", type: "hT" },
+        { q: "[습관] 선생님의 칭찬이나 친구와의 약속이 공부의 원동력이 된다.", type: "hF" },
+        { q: "[습관] 공부 시작 전 플래너를 작성하고 이를 엄격히 지킨다.", type: "hJ" },
+        { q: "[습관] 기분에 따라 과목을 유동적으로 선택해서 공부한다.", type: "hP" }
+    ];
+
+    let currentIdx = 0;
+    let scores = { E: 0, N: 0, F: 0, J: 0, hE:0, hI:0, hS:0, hN:0, hT:0, hF:0, hJ:0, hP:0 };
+
+    function startTest() {
+        document.getElementById('start-page').classList.remove('active');
+        document.getElementById('test-page').classList.add('active');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = questions[currentIdx];
+        document.getElementById('question-text').innerText = q.q;
+        document.getElementById('progress').style.width = ((currentIdx / questions.length) * 100) + "%";
+        
+        if (currentIdx >= 4) {
+            document.getElementById('step-title').innerText = "STEP 02. HABIT_ANALYSIS";
+            document.getElementById('step-title').style.color = "var(--neon-red)";
+        }
+    }
+
+    function nextQuestion(val) {
+        const type = questions[currentIdx].type;
+        scores[type] += val;
+        currentIdx++;
+
+        if (currentIdx < questions.length) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('test-page').classList.remove('active');
+        document.getElementById('result-page').classList.add('active');
+
+        let mbti = "";
+        mbti += scores.E > 0 ? "E" : "I";
+        mbti += scores.N > 0 ? "N" : "S";
+        mbti += scores.F > 0 ? "F" : "T";
+        mbti += scores.J > 0 ? "J" : "P";
+
+        // 습관 분석 로직 (가장 높은 습관 추출)
+        let maxHabit = "hJ";
+        let maxVal = -Infinity;
+        ['hE', 'hI', 'hS', 'hN', 'hT', 'hF', 'hJ', 'hP'].forEach(h => {
+            if(scores[h] > maxVal) { maxVal = scores[h]; maxHabit = h; }
+        });
+
+        let habitLabel = maxHabit.substring(1); // 'J', 'P' 등
+        let advice = "";
+
+        if (mbti.includes(habitLabel)) {
+            advice = "이미 본인의 MBTI 성향에 맞는 아주 효율적인 공부를 하고 있네요! 폼 미쳤다 🔥";
+        } else {
+            const adviceMap = {
+                'J': "당신은 계획적일 때 에너지를 얻는 J 유형입니다. 현재의 즉흥적인 방식보다는 플래너를 활용해 한 단계씩 해결해 나가는 것이 성적 향상에 도움이 될 거예요!",
+                'P': "당신은 유동적인 상황에서 창의력이 발휘되는 P 유형입니다. 너무 빡빡한 계획보다는 큰 틀만 잡고 자유롭게 공부해보는 건 어떨까요?",
+                'E': "혼자보다는 친구들과 묻고 답하며 공부할 때 더 잘 기억되는 타입입니다!",
+                'I': "주변의 시선이 없는 조용한 혼자만의 공간을 확보하는 것이 우선입니다."
+            };
+            // MBTI의 마지막 글자(J/P) 기준으로 조언 우선 생성
+            advice = adviceMap[mbti[3]] || "당신의 성향에 맞는 공부법으로 조금만 수정해보세요!";
+        }
+
+        const resultHTML = `
+            <h2 style="font-size: 2.5rem; margin: 0;">YOUR MBTI IS <span class="red-text">${mbti}</span></h2>
+            <p style="color: #aaa; margin-top: 5px;">#${mbti} #공부법_분석 #한계점_돌파</p>
+            <hr border="1" color="#333">
+            <div style="margin-top: 20px;">
+                <p><strong>[ 현재 나의 습관 ]</strong><br> 당신은 주로 <span class="green-text">${habitLabel}</span> 성향의 공부 습관을 보이고 있군요.</p>
+                <p><strong>[ 교정 솔루션 ]</strong><br> ${advice}</p>
+            </div>
+        `;
+        document.getElementById('result-area').innerHTML = resultHTML;
+    }
+</script>
+
+</body>
+</html>
